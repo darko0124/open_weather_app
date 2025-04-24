@@ -4,12 +4,12 @@ import yaml
 # Load config from YAML
 with open("D:\\Python_Projects\\Github_Repos\\open_weather_app\\config.yaml", "r") as file:  #Change this to be more generic
     config = yaml.safe_load(file)
-
+MAIN_URL = "https://api.openweathermap.org/data/2.5"
 api_config = config["openweathermap"]
 API_KEY = api_config["api_key"]
 CITIES = api_config["cities"]
 
-BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+WEATHER_URL = f"{MAIN_URL}/weather"
 
 for city in CITIES:
     params = {
@@ -19,7 +19,7 @@ for city in CITIES:
         "units": "metric"
     }
     
-    response = requests.get(BASE_URL, params=params)
+    response = requests.get(WEATHER_URL, params=params)
 
     if response.status_code == 200:
         data = response.json()
@@ -30,3 +30,6 @@ for city in CITIES:
     else:
         print(f"Error fetching weather for {city['name']} :",
             response.status_code, response.json())
+
+#Url to get current weather
+ONECALL_URL = f"{MAIN_URL}/onecall"
