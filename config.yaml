@@ -1,2 +1,4 @@
 openweathermap:
   api_key: a33a909f61c1924a8180042009172a14
+  lat: 51.5074     # Latitude for London
+  lon: -0.1278     # Longitude for London
