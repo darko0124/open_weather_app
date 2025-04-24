@@ -24,8 +24,9 @@ for city in CITIES:
     if response.status_code == 200:
         data = response.json()
         location = data.get("name", city["name"])
-        print(f"Weather in {location}: {data['weather'][0]['description']}")
-        print(f"Temperature: {data['main']['temp']}°C\n")
+        print(f"The weather in {location} is {data['weather'][0]['description']}.\n")
+        print(f"Humidity percentage in {location} is {data['main']['humidity']} %\n")
+        print(f"Current temperature in {location} is {data['main']['temp']}°C\n")
     else:
         print(f"Error fetching weather for {city['name']} :",
             response.status_code, response.json())
