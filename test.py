@@ -49,13 +49,16 @@ def get_forecast(city):
         forecast_data = forecast_response.json()
         location = forecast_data.get("city", {}).get("name", city["name"])
         print(f"\n3 hour forecast for {location}:\n")
-        
+        print("Time -- Temperature -- Humidity -- Weather -- Wind Speed")
         for element in forecast_data.get("list",[])[:8]:
             time_str = element["dt_txt"]
             time_obj = datetime.datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
             formatted_time = time_obj.strftime("%H:%M")
             temp = element["main"]["temp"]
-            print(f"{formatted_time} -- {temp} °C")
+            humidity = element["main"]["humidity"]
+            weather_condition = element["weather"][0]["main"]
+            wind_speed = element["wind"]["speed"]
+            print(f"{formatted_time} -- {temp} °C -- {humidity}% -- {weather_condition} -- {wind_speed} m/s")
     else:
         print(f"Error fetching weather for {city['name']} :", forecast_response.status_code)
 
