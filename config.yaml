@@ -1,16 +1,6 @@
 openweathermap:
   api_key: "a33a909f61c1924a8180042009172a14"
-  # cities:
-  #   - name: Sofia
-  #     lat: 42.6977
-  #     lon: 23.3219
-  #   - name: Berlin
-  #     lat: 52.52437
-  #     lon: 13.41053
-  #   - name: Dresden
-  #     lat: 51.0504
-  #     lon: 13.7373
-
+  
 database:
   dbname: "open_weather_app_db"
   user: "root"
