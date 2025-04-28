@@ -1,5 +1,5 @@
 openweathermap:
-  api_key:
+  api_key: "a33a909f61c1924a8180042009172a14"
   cities:
     - name: Sofia
       lat: 42.6977
@@ -12,8 +12,8 @@ openweathermap:
       lon: 13.7373
 
 database:
-  dbname: ""
-  user: ""
-  password: ""
-  host: ""
-  port: 
+  dbname: "open_weather_app_db"
+  user: "root"
+  password: "123321"
+  host: "localhost"
+  port: 3306
