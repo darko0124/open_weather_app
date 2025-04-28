@@ -29,10 +29,10 @@ def connect_to_db(db_config):
         )
         cur = conn.cursor()
         if conn.open:
-                print("✅ Successfully connected to the database.")
+            print("✅ Successfully connected to the database.")
         else:
-                print("❌ Failed to open database connection.")
-                return None
+            print("❌ Failed to open database connection.")
+            return None
         
         return conn
 
@@ -69,7 +69,7 @@ def get_weather(city, API_KEY):
         
     else:
         print(f"Error fetching weather for {city['name']} :",
-            response.status_code, response.json())
+        response.status_code, response.json())
 
 def get_forecast(city, API_KEY):
     FORECAST_URL = f"{MAIN_URL}/forecast"
