@@ -55,15 +55,23 @@ def get_weather(city, API_KEY):
     if response.status_code == 200:
         data = response.json()
         location = data.get("name", city["name"])
-        print(f"\nThe weather at the moment in {location} is {data['weather'][0]['description']}.\n")
-        print(f"Current humidity percentage in {location} is {data['main']['humidity']} %\n")
-        print(f"Current temperature in {location} is {data['main']['temp']}°C\n")
+        weather_description = data['weather'][0]['description']
+        humidity = data['main']['humidity']
+        temperature = data['main']['temp']
+        
+        return {
+            "city": location,
+            "weather_description": weather_description,
+            "humidity": humidity,
+            "temperature": temperature,
+            "timestamp": datetime.datetime.now(datetime.UTC)
+        }
+        
     else:
         print(f"Error fetching weather for {city['name']} :",
             response.status_code, response.json())
 
 def get_forecast(city, API_KEY):
-    #Url to get current weather (for 3-hourly temperature, because of free api restrictions)
     FORECAST_URL = f"{MAIN_URL}/forecast"
     
     forecast_params = {
@@ -73,25 +81,81 @@ def get_forecast(city, API_KEY):
         "units": "metric"
     }
         
-    forecast_response = requests.get(FORECAST_URL, params = forecast_params)
+    forecast_response = requests.get(FORECAST_URL, params=forecast_params)
     
     if forecast_response.status_code == 200:
         forecast_data = forecast_response.json()
         location = forecast_data.get("city", {}).get("name", city["name"])
-        print(f"\n3 hour forecast for {location}:\n")
-        print("Time -- Temperature -- Humidity -- Weather -- Wind Speed")
-        for element in forecast_data.get("list",[])[:8]:
+
+        forecast_list = []
+        for element in forecast_data.get("list", [])[:8]:  # Next 24 hours (8 x 3h = 24h)
             time_str = element["dt_txt"]
-            time_obj = datetime.datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
-            formatted_time = time_obj.strftime("%H:%M")
             temp = element["main"]["temp"]
             humidity = element["main"]["humidity"]
             weather_condition = element["weather"][0]["main"]
             wind_speed = element["wind"]["speed"]
-            print(f"{formatted_time} -- {temp} °C -- {humidity}% -- {weather_condition} -- {wind_speed} m/s")
-    else:
-        print(f"Error fetching weather for {city['name']} :", forecast_response.status_code)
 
+            forecast_list.append({
+                "city": location,
+                "forecast_time": time_str,
+                "temperature": temp,
+                "humidity": humidity,
+                "weather_condition": weather_condition,
+                "wind_speed": wind_speed
+            })
+        return forecast_list
+    else:
+        print(f"Error fetching forecast for {city['name']} :", forecast_response.status_code)
+        return []
+
+def insert_weather_data(cur, weather_data):
+    insert_query = """
+    INSERT INTO current_weather (city, weather_description, humidity, temperature, timestamp)
+    VALUES (%s, %s, %s, %s, %s)
+    """
+    try:
+        cur.execute(insert_query, (
+            weather_data["city"],
+            weather_data["weather_description"],
+            weather_data["humidity"],
+            weather_data["temperature"],
+            weather_data["timestamp"]
+        ))
+        
+        # Check if a row was affected
+        if cur.rowcount > 0:
+            print(f"✅ Weather data for {weather_data['city']} inserted successfully.")
+        else:
+            print(f"❌ No rows inserted for {weather_data['city']}.")
+        
+    except Exception as e:
+        print(f"❌ Error inserting weather data for {weather_data['city']}: {e}")
+
+def insert_forecast_data(cur, forecast_data_list):
+    insert_query = """
+    INSERT INTO forecast_weather (city, forecast_time, temperature, humidity, weather_condition, wind_speed)
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    for forecast_data in forecast_data_list:
+        try:
+            cur.execute(insert_query, (
+                forecast_data["city"],
+                forecast_data["forecast_time"],
+                forecast_data["temperature"],
+                forecast_data["humidity"],
+                forecast_data["weather_condition"],
+                forecast_data["wind_speed"]
+            ))
+            
+            # Check if a row was affected
+            if cur.rowcount > 0:
+                print(f"✅ Forecast data for {forecast_data['city']} at {forecast_data['forecast_time']} inserted successfully.")
+            else:
+                print(f"❌ No rows inserted for {forecast_data['city']} at {forecast_data['forecast_time']}.")
+                
+        except Exception as e:
+            print(f"❌ Error inserting forecast data for {forecast_data['city']} at {forecast_data['forecast_time']}: {e}")
+        
 def main():
     config = load_config()
     api_config = config["openweathermap"]
@@ -103,9 +167,15 @@ def main():
     cur = conn.cursor()
 
     for city in CITIES:
-        get_weather(city, API_KEY)
-        get_forecast(city, API_KEY)
-        
+        weather_data = get_weather(city, API_KEY)
+        if weather_data:
+            insert_weather_data(cur, weather_data)
+
+        forecast_data_list = get_forecast(city, API_KEY)
+        if forecast_data_list:
+            insert_forecast_data(cur, forecast_data_list)
+    
+    conn.commit()
     conn.close()
 
 if __name__ == "__main__":
