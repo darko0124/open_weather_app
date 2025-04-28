@@ -1,6 +1,8 @@
 import requests
 import yaml
 import datetime
+import pymysql
+import os
 
 # Load config from YAML
 with open("D:\\Python_Projects\\Github_Repos\\open_weather_app\\config.yaml", "r") as file:  #Change this to be more generic
@@ -10,7 +12,35 @@ api_config = config["openweathermap"]
 API_KEY = api_config["api_key"]
 CITIES = api_config["cities"]
 
-def get_weather(city):
+def load_config():
+    config_path = os.path.join(os.path.dirname(__file__), "config.yaml")  # Automatically resolves path
+    with open(config_path, "r") as file:
+        return yaml.safe_load(file)
+    
+# Connect to DB
+def connect_to_db(db_config):
+    try:
+        conn = pymysql.connect(
+            database = db_config["dbname"],
+            user = db_config["user"],
+            password = db_config["password"],
+            host = db_config["host"],
+            port = db_config["port"]
+        )
+        cur = conn.cursor()
+        if conn.open:
+                print("✅ Successfully connected to the database.")
+        else:
+                print("❌ Failed to open database connection.")
+                return None
+        
+        return conn
+
+    except Exception as e:
+        print(f"❌ Error connecting to the database: {e}")
+        return None
+
+def get_weather(city, API_KEY):
     WEATHER_URL = f"{MAIN_URL}/weather"
 
     params = {
@@ -32,7 +62,7 @@ def get_weather(city):
         print(f"Error fetching weather for {city['name']} :",
             response.status_code, response.json())
 
-def get_forecast(city):
+def get_forecast(city, API_KEY):
     #Url to get current weather (for 3-hourly temperature, because of free api restrictions)
     FORECAST_URL = f"{MAIN_URL}/forecast"
     
@@ -62,6 +92,21 @@ def get_forecast(city):
     else:
         print(f"Error fetching weather for {city['name']} :", forecast_response.status_code)
 
-for city in CITIES:
-    get_weather(city)
-    get_forecast(city)
+def main():
+    config = load_config()
+    api_config = config["openweathermap"]
+    API_KEY = api_config["api_key"]
+    CITIES = api_config["cities"]
+
+# Optional: Connect to DB if needed
+    conn = connect_to_db(config["database"])
+    cur = conn.cursor()
+
+    for city in CITIES:
+        get_weather(city, API_KEY)
+        get_forecast(city, API_KEY)
+        
+    conn.close()
+
+if __name__ == "__main__":
+    main()
