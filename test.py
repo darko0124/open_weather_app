@@ -190,12 +190,10 @@ def main():
     cur = conn.cursor()
      # Get cities from DB
     cities_df = get_cities_data(cur, queries_config["get_city_names"])
-    print(cities_df)
 
     # Loop through each city
     for index, city in cities_df.iterrows():
         weather_data = get_weather(city, API_KEY, MAIN_URL)
-        print(weather_data)
         if weather_data:
             insert_weather_data(cur, weather_data)
 
