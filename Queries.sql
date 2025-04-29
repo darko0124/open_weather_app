@@ -38,7 +38,53 @@ SELECT DISTINCT(c.name), round(avg(fw.temperature),2) AS temperature_average
 FROM forecast_weather fw
 JOIN city c ON fw.city_id = c.city_id
 WHERE
-    DATE(fw.forecast_time) BETWEEN '2025-01-29' AND '2025-05-03' #This can be changed to user input
+    DATE(fw.forecast_time) BETWEEN '2025-01-29' AND '2025-05-03'
 GROUP BY
     fw.city_id, c.name
 ORDER BY c.name
+
+-- What city had the highest absolute temperature in a certain period of time?
+SELECT
+    c.name AS city_name,
+    MAX(fw.temperature) AS highest_temperature
+FROM
+    forecast_weather fw
+JOIN
+    city c ON fw.city_id = c.city_id
+WHERE
+    DATE(fw.forecast_time) BETWEEN '2025-04-29' AND '2025-05-03' 
+GROUP BY
+    c.name
+ORDER BY
+    highest_temperature DESC
+LIMIT 1;
+
+-- Which city had the highest daily temperature variation in a certain period of time?
+SELECT
+    c.name AS city_name,
+    ROUND(MAX(fw.temperature) - MIN(fw.temperature), 2) AS daily_temperature_variation
+FROM
+    forecast_weather fw
+JOIN
+    city c ON fw.city_id = c.city_id
+WHERE
+    DATE(fw.forecast_time) BETWEEN '2025-04-29' AND '2025-05-03'
+GROUP BY
+    c.name
+ORDER BY
+    daily_temperature_variation DESC
+LIMIT 1;
+
+-- Which city had the strongest wind in a certain period of time ?
+select 
+	c.name as city_name,
+	MAX(fw.wind_speed) as max_wind_speed
+from
+	forecast_weather fw 
+join city c on fw.city_id  = c.city_id 
+where 
+	DATE(fw.forecast_time) BETWEEN '2025-04-29' AND '2025-05-03'
+GROUP BY
+    c.name
+ORDER by max_wind_speed desc
+limit 1;
