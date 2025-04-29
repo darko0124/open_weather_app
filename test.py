@@ -5,16 +5,8 @@ import pymysql
 import os
 import pandas as pd
 
-# # Load config from YAML
-# with open("D:\\Python_Projects\\Github_Repos\\open_weather_app\\config.yaml", "r") as file:  #Change this to be more generic
-#     config = yaml.safe_load(file)
-
-# api_config = config["openweathermap"]
-# API_KEY = api_config["api_key"]
-# CITIES = api_config["cities"]
-
 def load_config():
-    config_path = os.path.join(os.path.dirname(__file__), "config.yaml")  # Automatically resolves path
+    config_path = os.path.join(os.path.dirname(__file__), "config.yaml") 
     with open(config_path, "r") as file:
         return yaml.safe_load(file)
     
@@ -30,15 +22,15 @@ def connect_to_db(db_config):
         )
         cur = conn.cursor()
         if conn.open:
-            print("✅ Successfully connected to the database.")
+            print("Successfully connected to the database.")
         else:
-            print("❌ Failed to open database connection.")
+            print("Failed to open database connection.")
             return None
         
         return conn
 
     except Exception as e:
-        print(f"❌ Error connecting to the database: {e}")
+        print(f"Error connecting to the database: {e}")
         return None
 
 def get_weather(city, API_KEY, MAIN_URL):
@@ -118,26 +110,26 @@ def insert_data(cur, table_name, data, columns):
     :param data: A list of dictionaries where each dictionary represents a row to be inserted.
     :param columns: A list of column names in the same order as the data to be inserted.
     """
-    # Construct the placeholders for SQL query (%s for each column)
+    # Constructs the placeholders for SQL query (%s for each column)
     placeholders = ', '.join(['%s'] * len(columns))
     insert_query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})"
     print(insert_query)
     
     for row in data:
         try:
-            # Extract values from the row dictionary in the same order as the columns
+            # Extracts values from the row dictionary in the same order as the columns
             values = [row[column] for column in columns]
             print(values)
 
             cur.execute(insert_query, values)
             
-            # Check if a row was affected
+            # Checks if a row was affected
             if cur.rowcount > 0:
-                print(f"✅ Data for {row['city_id']} inserted successfully.")
+                print(f"Data for {row['city_id']} inserted successfully.")
             else:
-                print(f"❌ No rows inserted for {row['city_id']}.")
+                print(f"No rows inserted for {row['city_id']}.")
         except Exception as e:
-            print(f"❌ Error inserting data for {row['city_id']}: {e}")
+            print(f"Error inserting data for {row['city_id']}: {e}")
 
 def insert_weather_data(cur, weather_data):
     columns = ["city_id", "weather_description", "humidity", "temperature", "pressure"]
@@ -164,13 +156,13 @@ def select_data(cur, query, params=None):
         result = cur.fetchall()
 
         if result:
-            print("✅ Data fetched successfully.")
+            print("Data fetched successfully.")
         else:
-            print("❌ No data found for the query.")
+            print("No data found for the query.")
 
         return result
     except Exception as e:
-        print(f"❌ Error executing query: {e}")
+        print(f"Error executing query: {e}")
         return None
     
 def get_cities_data(cur, query):
@@ -200,7 +192,7 @@ def main():
     # Commit and close
     conn.commit()
     conn.close()
-    print("✅ All done!")
+    print("All done!")
     
 if __name__ == "__main__":
     main()
