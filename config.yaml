@@ -1,12 +1,12 @@
 openweathermap:
-  api_key: "a33a909f61c1924a8180042009172a14"
+  api_key: ""
   
 database:
-  dbname: "open_weather_app_db"
-  user: "root"
-  password: "123321"
-  host: "localhost"
-  port: 3306
+  dbname: ""
+  user: ""
+  password: ""
+  host: ""
+  port: 
   
 queries:
   get_city_names: "SELECT city_id, name, latitude, longitude FROM open_weather_app_db.city"
